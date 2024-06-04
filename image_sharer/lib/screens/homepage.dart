@@ -23,9 +23,15 @@ class HomePageState extends State<HomePage> {
         if (_images.length < 4) {
           _images.add(File(pickedFile.path));
         } else {
-          ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-            content: Text("4 Images are already picked"),
-          ));
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: const Text("4 Images are already picked"),
+              action: SnackBarAction(
+                label: 'OK',
+                onPressed: () {},
+              ),
+            ),
+          );
         }
       });
     }
@@ -63,40 +69,76 @@ class HomePageState extends State<HomePage> {
       appBar: AppBar(
         title: const Text('Image Upload and Share'),
       ),
-      body: Center(
+      body: Padding(
+        padding: const EdgeInsets.all(8.0),
         child: Column(
           children: [
             ElevatedButton(
               onPressed: _pickImage,
               child: const Text('Upload Image'),
             ),
+            const SizedBox(height: 10),
+            Text(
+              'Selected Images: ${_images.length}/4',
+              style: const TextStyle(fontSize: 16),
+            ),
+            const SizedBox(height: 10),
             Expanded(
-              child: GridView.builder(
-                gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                  crossAxisCount: 2,
-                  crossAxisSpacing: 4.0,
-                  mainAxisSpacing: 4.0,
-                ),
-                itemCount: _images.length,
-                itemBuilder: (context, index) {
-                  return Stack(
-                    children: [
-                      Image.file(_images[index], fit: BoxFit.cover),
-                      Positioned(
-                        top: 0,
-                        right: 0,
-                        child: IconButton(
-                          icon: const Icon(Icons.share, color: Colors.grey),
-                          onPressed: () => shareFile(_images[index]),
-                        ),
+              child: _images.isEmpty
+                  ? const Center(child: Text('No images selected'))
+                  : GridView.builder(
+                      gridDelegate:
+                          const SliverGridDelegateWithFixedCrossAxisCount(
+                        crossAxisCount: 2,
+                        crossAxisSpacing: 4.0,
+                        mainAxisSpacing: 4.0,
                       ),
-                    ],
-                  );
-                },
-              ),
+                      itemCount: _images.length,
+                      itemBuilder: (context, index) {
+                        return Card(
+                          clipBehavior: Clip.antiAlias,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                          child: Stack(
+                            fit: StackFit.expand,
+                            children: [
+                              Image.file(_images[index], fit: BoxFit.cover),
+                              Positioned(
+                                top: 8,
+                                right: 8,
+                                child: Row(
+                                  children: [
+                                    IconButton(
+                                      icon: const Icon(Icons.delete,
+                                          color: Colors.red),
+                                      onPressed: () {
+                                        setState(() {
+                                          _images.removeAt(index);
+                                        });
+                                      },
+                                    ),
+                                    IconButton(
+                                      icon: const Icon(Icons.share,
+                                          color: Colors.grey),
+                                      onPressed: () =>
+                                          shareFile(_images[index]),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ],
+                          ),
+                        );
+                      },
+                    ),
             ),
           ],
         ),
+      ),
+      floatingActionButton: FloatingActionButton(
+        onPressed: _pickImage,
+        child: const Icon(Icons.add),
       ),
     );
   }
